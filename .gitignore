@@ -1,2 +1,5 @@
 /build
 /dist
+
+# to ignore first remove them from tracking using command: git rm -r --cached build dist
+# then type git add .gitignore
