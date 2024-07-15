@@ -89,7 +89,7 @@ def checkForUpdates(log_window):
                             icon_path = os.path.join(update_dir_path, 'app', 'data-migration.ico')
                             file_path = os.path.join(update_dir_path, 'app', 'main.py')
                             # Create the exe
-                            command_to_exe = f"pyinstaller --name GinesysMigrationApp --onefile --windowed --icon={icon_path} {file_path}"
+                            command_to_exe = f"pyinstaller --name MigrationApp_{latest_version} --onefile --windowed --icon={icon_path} {file_path}"
 
                             # Execute the command
                             log_window.append('Creating executable...')
@@ -415,24 +415,24 @@ class UpdateConnectionApp(QWidget):
         update_button_layout.addWidget(self.update_app_button) 
 
         # Remote Host Selection
-        remote_group = QHBoxLayout()
-        remote_group.addWidget(QLabel('Remote Host Selection'))
+        # remote_group = QHBoxLayout()
+        # remote_group.addWidget(QLabel('Remote Host Selection'))
 
-        self.remote_host_combo = QComboBox()
-        self.remote_host_combo.addItems(['LocalHost','RemoteHost1', 'RemoteHost2', 'RemoteHost3'])
+        # self.remote_host_combo = QComboBox()
+        # self.remote_host_combo.addItems(['LocalHost','RemoteHost1', 'RemoteHost2', 'RemoteHost3'])
 
-        self.connect_button = QPushButton('Connect and Run Script')
-        self.connect_button.clicked.connect(self.connect_and_run)
+        # self.connect_button = QPushButton('Connect and Run Script')
+        # self.connect_button.clicked.connect(self.connect_and_run)
 
         self.logWindow = QTextEdit()
         self.logWindow.setReadOnly(True)
 
-        row_layout.addWidget(self.remote_host_combo)
-        row_layout.addWidget(self.connect_button)
+        # row_layout.addWidget(self.remote_host_combo)
+        # row_layout.addWidget(self.connect_button)
 
-        # Adjust the stretch factors for the 5:1 ratio
-        row_layout.setStretch(0, 1)  # Host dropdown stretch factor
-        row_layout.setStretch(0, 2)  # Button stretch factor
+        # # Adjust the stretch factors for the 5:1 ratio
+        # row_layout.setStretch(0, 1)  # Host dropdown stretch factor
+        # row_layout.setStretch(0, 2)  # Button stretch factor
 
         main_layout.addLayout(row_layout)
         main_layout.addLayout(update_button_layout)
