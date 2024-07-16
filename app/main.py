@@ -4,6 +4,7 @@ import json
 import shutil
 import subprocess
 import psycopg2
+import cx_Oracle
 import requests
 import os
 import zipfile
@@ -379,6 +380,10 @@ class UpdateConnectionApp(QWidget):
         self.updateButton.clicked.connect(self.updateConnections)
         button_layout.addWidget(self.updateButton)
 
+        self.compareVersion = QPushButton('Compare Version')
+        self.compareVersion.clicked.connect(self.compareVersions)
+        button_layout.addWidget(self.compareVersion)
+
         self.migrationButton = QPushButton('Run Migration App')
         self.migrationButton.clicked.connect(self.runMigrationApp)
         button_layout.addWidget(self.migrationButton)
@@ -528,6 +533,43 @@ class UpdateConnectionApp(QWidget):
         except Exception as e:
             QMessageBox.critical(self, 'Error', f'An error occurred: {e}')
             self.logWindow.append(f'\nError updating connections: {e}')
+
+    def compareVersions(self):
+        OraSchema = self.oraSchemaInput.text()
+        OraHost = self.oraHostInput.text()
+        OraPort = self.oraPortInput.text()
+        OraPass = self.oraPassInput.text()
+        OraService = self.oraServiceInput.text()
+        pgHost = self.pgHostInput.text()
+        pgPort = self.pgPortInput.text()
+        pgPass = self.pgPassInput.text()
+        pgUser = self.pgUserInput.text()
+        pgDbName = self.pgDbNameInput.text()
+        try:
+            oracon = cx_Oracle.connect(f'{OraSchema}/{OraPass}@{OraHost}:{OraPort}/{OraService}')
+            cur = oracon.cursor()
+            cur.execute('select db_version from gateway.packdef')
+            ora_version = cur.fetchone()[0]
+            cur.close()
+            oracon.close()
+        except cx_Oracle.DatabaseError as e:
+            QMessageBox.critical(self, 'Error', f'Failed to connect to Oracle database.\nError: {str(e)}')
+            return
+        try:
+            pgcon = psycopg2.connect(database=pgDbName, user=pgUser, password=pgPass, host=pgHost, port=pgPort)
+            cur = pgcon.cursor()
+            cur.execute('select db_version from gateway.packdef')
+            pg_version = cur.fetchone()[0]
+            cur.close()
+            pgcon.close()
+        except psycopg2.DatabaseError as e:
+            QMessageBox.critical(self,'Error',f'Failed to connect to postgres database.\nError: {str(e)}')
+            return
+
+        if ora_version == pg_version:
+            QMessageBox.information(self,f'Success!', f'Great, Version Matched!\nOracle({ora_version}) and Postgres({pg_version}) Version are the same,now you can proceed with migration!')
+        else:
+            QMessageBox.critical(self,'Error',f'Version Mismatch!\nOracle Version : {ora_version} and PostgreSQL Version: {pg_version}')
 
     def executeSQLPatch(self):
         patch_choice = self.patchComboBox.currentText()
