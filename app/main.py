@@ -66,7 +66,7 @@ def checkForUpdates(log_window):
                         current_version = f.read().strip()
                 except Exception as e:
                     log_window.append(f'Failed to read the current version. Error: {e}')
-                    return
+                    return 1
 
                 log_window.append(f'Current version: {current_version}')
                 log_window.append(f'Latest version: {latest_version}')
@@ -99,21 +99,29 @@ def checkForUpdates(log_window):
                             
                             if result.returncode == 0:
                                 log_window.append('Executable created successfully.')
+                                return 0
                             else:
                                 log_window.append(f"Failed to create executable. Error: {result.stderr}")
+                                return 1
                         except Exception as e:
                             log_window.append(f'Failed to extract and apply update. Error: {e}')
+                            return 1
                     else:
                         log_window.append(f"Failed to download update. Status code: {response.status_code}")
+                        return 1
                 else:
                     log_window.append('You are already using the latest version.')
+                    return 1
             else:
                 log_window.append('No assets found in the latest release.')
+                return 1
         else:
             log_window.append('Failed to fetch latest release information.')
+            return 1
 
     except Exception as e:
         log_window.append(f'Error checking and applying updates: {e}')
+        return 1
 
 def updateOraCon(OraSchema, OraHost,oraPort, OraPass,OraService, filepath, log_window):
     content = (
@@ -453,7 +461,10 @@ class UpdateConnectionApp(QWidget):
     def connect_and_run(self):
         print('connect_and_run')
     def checkAndApplyUpdates(self):
-        checkForUpdates(self.logWindow)
+        result = checkForUpdates(self.logWindow)
+        version_path = os.getcwd()
+        if result == 0:
+            QMessageBox.critical(self,'Updated!',f'Now close this application! Run the latest Verison!\n Check the latest version in directory: {version_path}')
     def loadCredentialsFromFiles(self):
         try:
             # Pre-specified file paths
