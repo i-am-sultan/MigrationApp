@@ -244,16 +244,17 @@ def executePatch(pgHost,pgPort,pgUserName,pgPass,pgDbname, patch_path, log_windo
             f1.write(content)
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(database=pgDbname, user=pgUserName, password=pgPass, host=pgHost, port=pgPort)
+        connection.autocommit = True
         cursor = connection.cursor()
         cursor.execute(content)
         connection.commit()
         
-        connection = psycopg2.connect(database=pgDbname, user=pgUserName, password=pgPass, host=pgHost, port=pgPort)
-        connection.autocommit = True
-        cursor = connection.cursor()
-        cursor.execute('CALL populate_first_time_migdata()')
+        # connection = psycopg2.connect(database=pgDbname, user=pgUserName, password=pgPass, host=pgHost, port=pgPort)
+        # connection.autocommit = True
+        # cursor = connection.cursor()
+        # cursor.execute('CALL populate_first_time_migdata()')
         # Commit the transaction
-        connection.commit()
+        # connection.commit()
         # Log successful execution
         log_window.append(f'\nSuccess: Executed patch {patch_path} on database {pgDbname}.')
     except psycopg2.Error as e:
