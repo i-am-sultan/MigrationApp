@@ -279,66 +279,20 @@ def cubeDataPopulation(self,pgHost, pgUserName, pgPort, pgPass,pgDbname,log_wind
         log_window.append(f'\nError: Failed to populate cube initial data. Unexpected error: {e}')
         return 0
     
-def createJobs(schema_name, pgHost, pgUserName, pgPort, pgPass, pgDbname, job_patch_path, log_window):
+def createJobs(pgHost, pgUserName, pgPort, pgPass, pgDbname, log_window):
     connection = None
     cursor = None
-    
     try:
-        with open(job_patch_path, 'r') as f1:
-            content = f1.read()
-       
-        patterns = [
-            (r"select cron\.schedule_in_database\('GINESYS_AUTO_SETTLEMENT_JOB_[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_AUTO_SETTLEMENT_JOB_{schema_name.upper()}','*/15 * * * *','call main.db_pro_auto_settle_unpost()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_DATA_SERVICE_2[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_DATA_SERVICE_2_{schema_name.upper()}','*/1 * * * *','call main.db_pro_gds2_event_enqueue()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_INVSTOCK_INTRA_LOG_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_INVSTOCK_INTRA_LOG_AGG_{schema_name.upper()}','30 seconds','call main.invstock_intra_log_refresh()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_INVSTOCK_LOG_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_INVSTOCK_LOG_AGG_{schema_name.upper()}','30 seconds','call main.invstock_log_refresh()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_PERIOD_CLOSURE_JOB[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_PERIOD_CLOSURE_JOB_{schema_name.upper()}','*/2 * * * *','call main.db_pro_period_closure_dequeue()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_POS_STLM_AUDIT[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_POS_STLM_AUDIT_{schema_name.upper()}','*/5 * * * *','call main.db_pro_pos_stlm_audit()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_RECALCULATE_TAX_JOB[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_RECALCULATE_TAX_JOB_{schema_name.upper()}','*/30 * * * *','call main.db_pro_recalculategst()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_PIPELINE_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_PIPELINE_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_pipeline_stock()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_costadj()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINTWISE_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINTWISE_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_stockpointwise()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_BATCH_SERIAL_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_BATCH_SERIAL_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_batchwise()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_BATCH_SERIAL_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_BATCH_SERIAL_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_costadj_batchwise()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINT_BATCH_SERIAL_WISE_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINT_BATCH_SERIAL_WISE_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_stockpoint_batchwise()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STK_AGEING_FIRSTTIME[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STK_AGEING_FIRSTTIME_{schema_name.upper()}','0 0 * * *','call db_pro_stk_ageing_firsttime()','{pgDbname}');"),
-            (r"select cron\.schedule_in_database\('GINESYS_STK_AGEING_STKPOINTWISE_FIRSTTIME[^']+','[^']+','[^']+','[^']+'\);",
-            f"select cron.schedule_in_database('GINESYS_STK_AGEING_STKPOINTWISE_FIRSTTIME_{schema_name.upper()}','0 0 * * *','call db_pro_stk_ageing_stockpointwise_firsttime()','{pgDbname}');"),
-        ]
-
-        for pattern, replacement in patterns:
-            content = re.sub(pattern, replacement, content)
-
-        with open(job_patch_path, 'w') as f1:
-            f1.write(content)
-
-        # Connect to the PostgreSQL database and execute the patched SQL
+        # Connect to the PostgreSQL database and execute the job creation procedure.
         connection = psycopg2.connect(database='postgres', user=pgUserName, password=pgPass, host=pgHost, port=pgPort)
         cursor = connection.cursor()
-        cursor.execute(content)
+        cursor.execute('call schedule_jobs_in_postgres()')
         connection.commit()
-
-        log_window.append(f'\nSuccessfully executed job patch {job_patch_path} on database {pgDbname}.')
+        log_window.append(f'\nSuccessfully created jobs on database {pgDbname}.')
     except psycopg2.Error as e:
-        log_window.append(f'\nError executing job patch {job_patch_path} on database {pgDbname}: {e}')
+        log_window.append(f'\nError creating jobs on database {pgDbname}: {e}')
     except Exception as e:
-        log_window.append(f'\nUnexpected error executing job patch {job_patch_path} on database {pgDbname}: {e}')
+        log_window.append(f'\nUnexpected error while creating jobs on database {pgDbname}: {e}')
     finally:
         if cursor:
             cursor.close()
@@ -441,7 +395,7 @@ class UpdateConnectionApp(QWidget):
         button_layout.addWidget(self.cubePopulationButton)
 
         self.createJobsButton = QPushButton('Create Jobs')
-        self.createJobsButton.clicked.connect(self.createJobs)
+        self.createJobsButton.clicked.connect(self.createJobsThread)
         button_layout.addWidget(self.createJobsButton)
 
         self.exitButton = QPushButton('Exit')
@@ -644,20 +598,18 @@ class UpdateConnectionApp(QWidget):
     def displayresult(self):
         QMessageBox.information(self,'Success','Cube data successfully populated')
 
+    def createJobsThread(self):
+        t1 = Thread(target=self.createJobs)
+        t1.start()
+
     def createJobs(self):
-
-        global oracon_path
-        global pgcon_path
-        global job_patch_path
-
         pgDbname = self.pgDbNameInput.text()
         pgUserName = self.pgUserInput.text()
         pgHost = self.pgHostInput.text()
         pgPort = self.pgPortInput.text()
         pgPass = self.pgPassInput.text()
-        schema_name= self.oraSchemaInput.text()
 
-        createJobs(schema_name, pgHost, pgUserName, pgPort, pgPass, pgDbname, job_patch_path, self.logWindow)
+        createJobs(pgHost, pgUserName, pgPort, pgPass, pgDbname, self.logWindow)
 
     def runMigrationApp(self):
         global migrationapp_path
