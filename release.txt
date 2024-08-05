@@ -1,0 +1,6 @@
+HOW TO RELEASE A UPDATE
+1. Commit the changes
+2. Run the exe and check the functionality
+3. Update the version.txt
+4. Make the zip of app folder 
+5. Upload to github with tag you have just written on 'version.txt'

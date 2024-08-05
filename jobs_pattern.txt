@@ -1,0 +1,56 @@
+patterns = [
+            (r"select cron\.schedule_in_database\('GINESYS_AUTO_SETTLEMENT_JOB_[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_AUTO_SETTLEMENT_JOB_{schema_name.upper()}','*/15 * * * *','call main.db_pro_auto_settle_unpost()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_DATA_SERVICE_2[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_DATA_SERVICE_2_{schema_name.upper()}','*/1 * * * *','call main.db_pro_gds2_event_enqueue()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_INVSTOCK_INTRA_LOG_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_INVSTOCK_INTRA_LOG_AGG_{schema_name.upper()}','30 seconds','call main.invstock_intra_log_refresh()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_INVSTOCK_LOG_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_INVSTOCK_LOG_AGG_{schema_name.upper()}','30 seconds','call main.invstock_log_refresh()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_PERIOD_CLOSURE_JOB[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_PERIOD_CLOSURE_JOB_{schema_name.upper()}','*/2 * * * *','call main.db_pro_period_closure_dequeue()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_POS_STLM_AUDIT[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_POS_STLM_AUDIT_{schema_name.upper()}','*/5 * * * *','call main.db_pro_pos_stlm_audit()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_RECALCULATE_TAX_JOB[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_RECALCULATE_TAX_JOB_{schema_name.upper()}','*/30 * * * *','call main.db_pro_recalculategst()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_PIPELINE_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_PIPELINE_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_pipeline_stock()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_costadj()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINTWISE_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINTWISE_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_stockpointwise()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_BATCH_SERIAL_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_BATCH_SERIAL_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_batchwise()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_BATCH_SERIAL_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_BATCH_SERIAL_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_costadj_batchwise()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINT_BATCH_SERIAL_WISE_DELTA_AGG[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINT_BATCH_SERIAL_WISE_DELTA_AGG_{schema_name.upper()}','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_stockpoint_batchwise()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STK_AGEING_FIRSTTIME[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STK_AGEING_FIRSTTIME_{schema_name.upper()}','0 0 * * *','call db_pro_stk_ageing_firsttime()','{pgDbname}');"),
+            (r"select cron\.schedule_in_database\('GINESYS_STK_AGEING_STKPOINTWISE_FIRSTTIME[^']+','[^']+','[^']+','[^']+'\);",
+            f"select cron.schedule_in_database('GINESYS_STK_AGEING_STKPOINTWISE_FIRSTTIME_{schema_name.upper()}','0 0 * * *','call db_pro_stk_ageing_stockpointwise_firsttime()','{pgDbname}');"),
+        ]
+
+select cron.schedule_in_database('GINESYS_AUTO_SETTLEMENT_JOB_MAIN','*/15 * * * *','call main.db_pro_auto_settle_unpost()','pgqa');
+select cron.schedule_in_database('GINESYS_DATA_SERVICE_2_MAIN','*/1 * * * *','call main.db_pro_gds2_event_enqueue()','pgqa');
+select cron.schedule_in_database('GINESYS_INVSTOCK_INTRA_LOG_AGG_MAIN','30 seconds','call main.invstock_intra_log_refresh()','pgqa');
+select cron.schedule_in_database('GINESYS_INVSTOCK_LOG_AGG_MAIN','30 seconds','call main.invstock_log_refresh()','pgqa');
+select cron.schedule_in_database('GINESYS_PERIOD_CLOSURE_JOB_MAIN','*/2 * * * *','call main.db_pro_period_closure_dequeue()','pgqa');
+select cron.schedule_in_database('GINESYS_POS_STLM_AUDIT_MAIN','*/5 * * * *','call main.db_pro_pos_stlm_audit()','pgqa');
+select cron.schedule_in_database('GINESYS_RECALCULATE_TAX_JOB_MAIN','*/30 * * * *','call main.db_pro_recalculategst()','pgqa');
+
+--CUBE
+
+select cron.schedule_in_database('GINESYS_STOCK_BOOK_PIPELINE_DELTA_AGG_MAIN','*/5 * * * *','call db_pro_delta_agg_pipeline_stock()','pgqa');
+select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_DELTA_AGG_MAIN','*/5 * * * *','call db_pro_delta_agg_stock_book_summary()','pgqa');
+select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_DELTA_AGG_MAIN','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_costadj()','pgqa');
+select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINTWISE_DELTA_AGG_MAIN','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_stockpointwise()','pgqa');
+
+select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_BATCH_SERIAL_DELTA_AGG_MAIN','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_batchwise()','pgqa');
+select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_COSTADJ_BATCH_SERIAL_DELTA_AGG_MAIN','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_costadj_batchwise()','pgqa');
+select cron.schedule_in_database('GINESYS_STOCK_BOOK_SUMMARY_STOCKPOINT_BATCH_SERIAL_WISE_DELTA_AGG_MAIN','*/5 * * * *','call db_pro_delta_agg_stock_book_summary_stockpoint_batchwise()','pgqa');
+
+select cron.schedule_in_database('GINESYS_STK_AGEING_FIRSTTIME_MAIN','0 0 * * *','call db_pro_stk_ageing_firsttime()','pgqa');
+select cron.schedule_in_database('GINESYS_STK_AGEING_STKPOINTWISE_FIRSTTIME_MAIN','0 0 * * *','call db_pro_stk_ageing_stockpointwise_firsttime()','pgqa');

@@ -134,16 +134,8 @@ class UpdateConnectionApp(QMainWindow):
         # sidebar_layout.setSpacing(10)
         
         # Define buttons with icons and CSS styling
-
-        # New button for checking and applying updates
-        self.update_app_button = QPushButton()
-        self.update_app_button.setIcon(QIcon(r'icons\icons8-download-button-32.png'))
-        self.update_app_button.setStyleSheet("QPushButton {background-color: black; color: white; font-weight: bold; border-radius: 5px; padding: 10px;} QPushButton:hover {background-color: grey;}")
-        self.update_app_button.clicked.connect(self.checkAndApplyUpdates)
-        sidebar_layout.addWidget(self.update_app_button) #ffffff dedcdc
-        
         self.updateButton = QPushButton('Update Connections')
-        self.updateButton.setStyleSheet("QPushButton {background-color: #2980b9; color: white; font-weight: bold; border-radius: 5px; padding: 10px;} QPushButton:hover {background-color: #00416b;}")
+        self.updateButton.setStyleSheet("QPushButton {background-color: #3498db; color: white; font-weight: bold; border-radius: 5px; padding: 10px;} QPushButton:hover {background-color: #2980b9;}")
         self.updateButton.clicked.connect(self.updateConnections)
         sidebar_layout.addWidget(self.updateButton)
 
@@ -192,9 +184,17 @@ class UpdateConnectionApp(QMainWindow):
         sidebar_layout.addWidget(self.createJobsButton)
         
         self.exitButton = QPushButton(QIcon('icons/exit.png'), 'Exit')
-        self.exitButton.setStyleSheet("QPushButton {background-color: #c0392b; color: white; font-weight: bold; border-radius: 5px; padding: 10px;} QPushButton:hover {background-color: #570500;}")
+        self.exitButton.setStyleSheet("QPushButton {background-color: #c0392b; color: white; font-weight: bold; border-radius: 5px; padding: 10px;} QPushButton:hover {background-color: #700700;}")
         self.exitButton.clicked.connect(self.closeApplication)
         sidebar_layout.addWidget(self.exitButton) #700700 c0392b
+
+        # New button for checking and applying updates
+        self.update_app_button = QPushButton()
+        self.update_app_button.setIcon(QIcon(r'C:\Users\sultan.m\Documents\Ginesys\MigrationApp\app2\icons\icons8-update-50.png'))
+
+        self.update_app_button.setStyleSheet("QPushButton {background-color: #dedcdc; color: white; font-weight: bold; border-radius: 5px; padding: 10px;} QPushButton:hover {background-color: #ffffff;}")
+        self.update_app_button.clicked.connect(self.checkAndApplyUpdates)
+        sidebar_layout.addWidget(self.update_app_button) #ffffff dedcdc
 
         # Log Window
         self.logWindow = QTextEdit()
