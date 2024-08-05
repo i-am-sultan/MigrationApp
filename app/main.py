@@ -31,7 +31,7 @@ class UpdateConnectionApp(QMainWindow):
     def initUI(self):
         self.setWindowTitle('Ginesys Migration Application')
         self.resize(1000,400)
-        self.setWindowIcon(QIcon('icon.png'))  # Set a custom icon for the window
+        # self.setWindowIcon(QIcon(r'app\data-migration.ico'))  # Set a custom icon for the window
         
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
@@ -44,9 +44,7 @@ class UpdateConnectionApp(QMainWindow):
         # Define CSS styling
         label_style = "font-size: 14px; font-weight: regular; color: #2c3e50;"
         input_style = "background-color: white; border: 1px solid #bdc3c7; border-radius: 5px; padding: 5px; font-size: 14px; color: #34495e;"
-        # input_style = "background-color: #ecf0f1; border: 1px solid #bdc3c7; border-radius: 5px; padding: 5px; font-size: 14px; color: #34495e;"
 
-        
         # Oracle credentials
         self.oraHostLabel = QLabel('Oracle Host:')
         self.oraHostLabel.setStyleSheet(label_style)
@@ -136,11 +134,10 @@ class UpdateConnectionApp(QMainWindow):
         # Define buttons with icons and CSS styling
 
         # New button for checking and applying updates
-        self.update_app_button = QPushButton()
-        self.update_app_button.setIcon(QIcon(r'icons\icons8-download-button-32.png'))
+        self.update_app_button = QPushButton("Check for Updates")
         self.update_app_button.setStyleSheet("QPushButton {background-color: black; color: white; font-weight: bold; border-radius: 5px; padding: 10px;} QPushButton:hover {background-color: grey;}")
         self.update_app_button.clicked.connect(self.checkAndApplyUpdates)
-        sidebar_layout.addWidget(self.update_app_button) #ffffff dedcdc
+        sidebar_layout.addWidget(self.update_app_button)
         
         self.updateButton = QPushButton('Update Connections')
         self.updateButton.setStyleSheet("QPushButton {background-color: #2980b9; color: white; font-weight: bold; border-radius: 5px; padding: 10px;} QPushButton:hover {background-color: #00416b;}")
