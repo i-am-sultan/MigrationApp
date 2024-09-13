@@ -7,6 +7,16 @@ import zipfile
 from io import BytesIO
 import json
 import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import logging
+import socket
+
+# Logging Configuration
+LOG_DIR = os.path.join(os.getcwd(), 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_FILE_PATH = os.path.join(LOG_DIR, f'single_migration_log_{socket.gethostname()}.log')
+logging.basicConfig(filename=LOG_FILE_PATH, filemode='a', format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+
 
 oracon_path = r'C:\Program Files\edb\prodmig\RunCMDEdb_New\netcoreapp3.1\OraCon.txt'
 pgcon_path = r'C:\Program Files\edb\prodmig\RunCMDEdb_New\netcoreapp3.1\pgCon.txt'
@@ -240,23 +250,196 @@ def executePatch(pgHost,pgPort,pgUserName,pgPass,pgDbname, patch_path, log_windo
         if connection:
             connection.close()
 
-def cubeDataPopulation(self,pgHost, pgUserName, pgPort, pgPass,pgDbname,log_window):
+# def cubeDataPopulation(self,pgHost, pgUserName, pgPort, pgPass,pgDbname,log_window):
+#     try:
+#         connection = psycopg2.connect(database=pgDbname, user=pgUserName, password=pgPass, host=pgHost, port=pgPort)
+#         connection.autocommit = True
+#         cursor = connection.cursor()
+#         log_window.append(f'\nCube intial data population is started...')
+#         cursor.execute('CALL populate_first_time_migdata()')
+#         # Commit the transaction
+#         connection.commit()
+#         connection.close()
+#         # Log successful execution
+#         log_window.append(f'\nSuccess: Intial cube data populatino is done.')
+#         return 1
+#     except Exception as e:
+#         log_window.append(f'\nError: Failed to populate cube initial data. Unexpected error: {e}')
+#         return 0
+
+
+# def cubeDataPopulation(self,pgHost, pgUserName, pgPort, pgPass,pgDbname,log_window):
+#     print('cubeDataPopulation')
+#     connection_params = {
+#         'database': pgDbname,
+#         'user': pgUserName,
+#         'password': pgPass,
+#         'host': pgHost,
+#         'port': pgPort
+#     }
+
+#     # List of procedure calls with parameters
+#     procedures = [
+#         "call main.db_pro_sitetositemovement_firsttimepopulation_outward('2023-04-01', CURRENT_DATE);",
+#         "call main.db_pro_sitetositemovement_firsttimepopulation_inward('2023-04-01', CURRENT_DATE);",
+#         "call main.db_pro_sitetositemovement_not_in_outward();",
+#         "call main.db_proc_sitetosite_intransum('2023-04-01');",
+#         "call main.db_pro_compositegst_firsttimepopulation('2023-04-01', CURRENT_DATE);",
+#         "call main.db_pro_stk_bk_summary_master_build('2023-04-01');",
+#         "call main.db_pro_stk_bk_batchwise_master_build('2023-04-01');",
+#         "call main.db_pro_stk_bk_summary_stockpointwise_master_build('2023-04-01');",
+#         "call main.db_pro_stk_bk_stockpointwise_batchwise_master_build('2023-04-01');",
+#         "call main.db_pro_stk_bk_costadj_master_build('2023-04-01');",
+#         "call main.db_pro_stk_bk_costadj_batchwise_master_build('2023-04-01');",
+#         "call main.db_pro_stk_ageing_firsttime();",
+#         "call main.db_pro_stk_ageing_stockpointwise_firsttime();"
+#     ]
+
+#     # Use ThreadPoolExecutor to run procedures concurrently
+#     results = []
+#     with ThreadPoolExecutor(max_workers=len(procedures)) as executor:
+#         future_to_proc = {executor.submit(execute_procedure, connection_params, proc,log_window): proc for proc in procedures}
+#         for future in as_completed(future_to_proc):
+#             proc = future_to_proc[future]
+#             try:
+#                 # result = future.result()
+#                 # results.append(str(result))
+#                 results = 0
+#             except Exception as e:
+#                 log_window.append(f'Error while executing procedure: {e}')
+#                 results.append(f'Error while executing procedure: {e}')
+    
+#     # Combine all results
+#     print(f'{results}')
+#     if results:
+#         results = '\n'.join(results)
+#         return 0
+#     else:
+#         return 1
+
+def execute_procedure(connection_params, proc_call, log_window):
+    print(f'{proc_call}')
+    log_window.append(f'Attempting procedure: {proc_call}')
+    connection = None
+    cursor = None
+    
     try:
-        connection = psycopg2.connect(database=pgDbname, user=pgUserName, password=pgPass, host=pgHost, port=pgPort)
+        # Attempt to connect to the PostgreSQL database
+        print('Attempting to connect to the database...')
+        log_window.append('Attempting to connect to the database...')
+        
+        connection = psycopg2.connect(**connection_params)
+        print('Connected to the database.')
+        log_window.append('Connected to the database.')
+
+        # Automatically commit changes
         connection.autocommit = True
+        
+        # Create a cursor to execute the stored procedure
         cursor = connection.cursor()
-        log_window.append(f'\nCube intial data population is started...')
-        cursor.execute('CALL populate_first_time_migdata()')
-        # Commit the transaction
-        connection.commit()
-        connection.close()
-        # Log successful execution
-        log_window.append(f'\nSuccess: Intial cube data populatino is done.')
-        return 1
-    except Exception as e:
-        log_window.append(f'\nError: Failed to populate cube initial data. Unexpected error: {e}')
+        print('Connection established, executing procedure...')
+        log_window.append('Connection established, executing procedure...')
+        
+        # Execute the procedure call
+        cursor.execute(proc_call)
+        print(f'Procedure call "{proc_call}" executed successfully.')
+        log_window.append(f'Procedure call "{proc_call}" executed successfully.')
+        logging.info(f'Procedure call "{proc_call}" executed successfully.')
         return 0
     
+    except psycopg2.OperationalError as op_err:
+        # Handle operational errors (e.g., connection issues)
+        error_msg = f'Operational error: Could not connect to the database. Error: {op_err}'
+        print(error_msg)
+        log_window.append(error_msg)
+        logging.error(error_msg)
+        return error_msg
+
+    except psycopg2.DatabaseError as db_err:
+        # Handle database errors (e.g., authentication failure, query issues)
+        error_msg = f'Database error while executing procedure call "{proc_call}". Error: {db_err}'
+        print(error_msg)
+        log_window.append(error_msg)
+        logging.error(error_msg)
+        if connection:
+            connection.rollback()  # Rollback in case of error
+        return error_msg
+
+    except Exception as e:
+        # Handle any other general errors
+        error_msg = f'Unexpected error while executing procedure call "{proc_call}": {e}'
+        print(error_msg)
+        log_window.append(error_msg)
+        logging.error(error_msg)
+        return error_msg
+    
+    finally:
+        # Close the cursor and connection if they were opened
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+        log_window.append('Connection closed.')
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def cubeDataPopulation(self, pgHost, pgUserName, pgPort, pgPass, pgDbname, log_window):
+    print('cubeDataPopulation started')
+    log_window.append('Starting cube data population process...')
+    
+    connection_params = {
+        'database': pgDbname,
+        'user': pgUserName,
+        'password': pgPass,
+        'host': pgHost,
+        'port': pgPort
+    }
+
+    # List of procedure calls with parameters
+    procedures = [
+        "call main.db_pro_sitetositemovement_firsttimepopulation_outward('2023-04-01', CURRENT_DATE);",
+        "call main.db_pro_sitetositemovement_firsttimepopulation_inward('2023-04-01', CURRENT_DATE);",
+        "call main.db_pro_sitetositemovement_not_in_outward();",
+        "call main.db_proc_sitetosite_intransum('2023-04-01');",
+        "call main.db_pro_compositegst_firsttimepopulation('2023-04-01', CURRENT_DATE);",
+        "call main.db_pro_stk_bk_summary_master_build('2023-04-01');",
+        "call main.db_pro_stk_bk_batchwise_master_build('2023-04-01');",
+        "call main.db_pro_stk_bk_summary_stockpointwise_master_build('2023-04-01');",
+        "call main.db_pro_stk_bk_stockpointwise_batchwise_master_build('2023-04-01');",
+        "call main.db_pro_stk_bk_costadj_master_build('2023-04-01');",
+        "call main.db_pro_stk_bk_costadj_batchwise_master_build('2023-04-01');",
+        "call main.db_pro_stk_ageing_firsttime();",
+        "call main.db_pro_stk_ageing_stockpointwise_firsttime();"
+    ]
+
+    # Use ThreadPoolExecutor to run procedures concurrently
+    results = []
+    log_window.append('Executing procedures concurrently...')
+    
+    with ThreadPoolExecutor(max_workers=len(procedures)) as executor:
+        future_to_proc = {executor.submit(execute_procedure, connection_params, proc, log_window): proc for proc in procedures}
+        for future in as_completed(future_to_proc):
+            proc = future_to_proc[future]
+            try:
+                result = future.result()
+                # Log success or error based on result
+                if result == 0:
+                    log_window.append(f'Procedure "{proc}" completed successfully.')
+                else:
+                    log_window.append(f'Procedure "{proc}" failed with error: {result}')
+                results.append(result)
+            except Exception as e:
+                log_window.append(f'Error while executing procedure "{proc}": {e}')
+                results.append(f'Error while executing procedure "{proc}": {e}')
+    
+    # Check if all procedures were executed successfully
+    if all(result == 0 for result in results):
+        log_window.append('All procedures completed successfully.')
+        return 0
+    else:
+        log_window.append('Some procedures failed. Check the log for details.')
+        return 1
+
+
 def createJobs(pgHost, pgUserName, pgPort, pgPass, pgDbname, log_window):
     connection = None
     cursor = None

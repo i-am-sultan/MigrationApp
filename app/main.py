@@ -12,15 +12,15 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon
 from basics import *
 
-oracon_path = r'C:\Program Files\edb\prodmig\RunCMDEdb_New\netcoreapp3.1\OraCon.txt'
-pgcon_path = r'C:\Program Files\edb\prodmig\RunCMDEdb_New\netcoreapp3.1\pgCon.txt'
+oracon_path = r'C:\Program Files\edb\prodmig\RunCMDEdb_New\RunEDBToolkit_OLD\netcoreapp3.1\OraCon.txt'
+pgcon_path = r'C:\Program Files\edb\prodmig\RunCMDEdb_New\RunEDBToolkit_OLD\netcoreapp3.1\pgCon.txt'
 toolkit_path = r'C:\Program Files\edb\mtk\etc\toolkit.properties'
 connection_json_path = r'C:\Program Files\edb\prodmig\Ora2PGCompToolKit\Debug\Connection.json'
 audit_path = r'C:\Program Files\edb\prodmig\AuditTriggerCMDNew\netcoreapp3.1'
 patch_drill_path = r'C:\Program Files\edb\prodmig\PostMigPatches\patch_drill.sql'
 patch_live_path = r'C:\Program Files\edb\prodmig\PostMigPatches\patch_live.sql'
 job_patch_path = r'C:\Program Files\edb\prodmig\PostMigPatches\patch_jobs.sql'
-migrationapp_path = r'C:\Program Files\edb\prodmig\RunCMDEdb_New\netcoreapp3.1\RunEDBCommand.exe'
+migrationapp_path = r'C:\Program Files\edb\prodmig\RunCMDEdb_New\RunEDBToolkit_OLD\netcoreapp3.1\RunEDBCommand.exe'
 audittriggerapp_path = r'C:\Program Files\edb\prodmig\AuditTriggerCMDNew\netcoreapp3.1\TriggerConstraintViewCreationForAuditPostMigration.exe'
 comparetoolapp_path = r'C:\Program Files\edb\prodmig\Ora2PGCompToolKit\Debug\OraPostGreSqlComp.exe'
 
@@ -366,11 +366,11 @@ class UpdateConnectionApp(QMainWindow):
         else:
             QMessageBox.warning(self, 'Database not found', 'Unable to determine database name from pgCon.txt.')
     
-    def cubeDataPopulationThread(self):
-        t1 = Thread(target=self.cubeDataPopulation)
-        t1.start()
+    # def cubeDataPopulationThread(self):
+    #     t1 = Thread(target=self.cubeDataPopulation)
+    #     t1.start()
         
-    def cubeDataPopulation(self):
+    def cubeDataPopulationThread(self):
         pgDbname = self.pgDbNameInput.text()
         pgUserName = self.pgUserInput.text()
         pgHost = self.pgHostInput.text()
